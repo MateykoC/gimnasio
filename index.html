@@ -212,22 +212,47 @@ const firebaseConfig = {
             margin-top: 12px;
         }
 
-        .setup-row {
-            display: grid;
-            grid-template-columns: 2fr 1fr 1fr;
-            gap: 8px;
-            align-items: center;
-            background-color: var(--bg-input);
-            padding: 6px 12px;
-            border-radius: 4px;
-            font-size: 0.85rem;
-        }
+    /* Modificación de la fila para dar más espacio al texto y permitir saltos automáticos */
+.setup-row {
+    display: grid;
+    grid-template-columns: 1.5fr 60px 60px; /* Ancho fijo para inputs, el resto para el texto */
+    gap: 8px;
+    align-items: center;
+    background-color: var(--bg-input);
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-size: 0.85rem;
+}
 
-        .setup-row input {
-            padding: 6px;
-            font-size: 0.85rem;
-            text-align: center;
-        }
+/* Forzar que el texto del ejercicio baje en lugar de estirar la pantalla */
+.setup-row span {
+    white-space: normal;
+    word-break: break-word;
+    line-height: 1.2;
+}
+
+/* Ajuste idéntico para los chips del banco global de ejercicios */
+.chip {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border);
+    padding: 8px 14px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    color: var(--text-main);
+    white-space: normal;
+    word-break: break-word;
+    max-width: 100%;
+}
+
+/* Ajuste para los títulos principales de los ejercicios en el modo entrenamiento */
+.card-workout h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 4px;
+    white-space: normal;
+    word-break: break-word;
+    line-height: 1.3;
+}
 
         .selector-grid {
             display: grid;
