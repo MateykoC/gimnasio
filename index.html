@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IronTrack - Performance</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+        import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc, updateDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCWZNvXnML65-tiEwEofQU9y2ePkVtUU9w",
+  authDomain: "iron-track-gym.firebaseapp.com",
+  projectId: "iron-track-gym",
+  storageBucket: "iron-track-gym.firebasestorage.app",
+  messagingSenderId: "436269194953",
+  appId: "1:436269194953:web:1705275b0aebd7a60e3718"
+};
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const provider = new GoogleAuthProvider();
+
+        window.auth = auth;
+        window.db = db;
+        window.signInWithGoogle = () => signInWithPopup(auth, provider);
+        window.logout = () => signOut(auth);
+        window.doc = doc;
+        window.setDoc = setDoc;
+        window.getDoc = getDoc;
+        window.updateDoc = updateDoc;
+        window.arrayUnion = arrayUnion;
+    </script>
+    <style>
+        :root {
+            --bg-main: #121214;
+            --bg-card: #1a1a1e;
+            --bg-input: #222226;
+            --border: #2a2a30;
+            --text-main: #e1e1e6;
+            --text-muted: #a8a8b3;
+            --accent: #e50914;
+            --accent-hover: #b80710;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            padding-bottom: 80px;
+        }
+
+        header {
+            background-color: var(--bg-card);
+            padding: 16px 24px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header h1 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        header h1 span {
+            color: var(--accent);
+        }
+
+        .auth-btn {
+            background-color: transparent;
+            color: var(--text-main);
+            border: 1px solid var(--border);
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: background 0.2s;
+        }
+
+        .auth-btn:hover {
+            background-color: var(--bg-input);
+        }
+
+        main {
+            flex: 1;
+            padding: 24px;
+            max-width: 600px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        .view-section {
+            display: none;
+        }
+
+        .view-section.active {
+            display: block;
+        }
+
+        h2 {
+            font-size: 1.25rem;
+            margin-bottom: 20px;
+            font-weight: 600;
+            letter-spacing: -0.3px;
+        }
+
+        .form-inline {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        input[type="text"], input[type="number"], select {
+            flex: 1;
+            background-color: var(--bg-input);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            padding: 12px 16px;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        input[type="text"]:focus, input[type="number"]:focus, select:focus {
+            border-color: var(--accent);
+        }
+
+        .btn-action {
+            background-color: var(--accent);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-action:hover {
+            background-color: var(--accent-hover);
+        }
+
+        .chip-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 28px;
+        }
+
+        .chip {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border);
+            padding: 8px 14px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            color: var(--text-main);
+        }
+
+        .accordion {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            margin-bottom: 12px;
+            overflow: hidden;
+        }
+
+        .accordion-header {
+            padding: 16px;
+            font-weight: 500;
+            font-size: 0.95rem;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .accordion-content {
+            padding: 16px;
+            border-top: 1px solid var(--border);
+            background-color: #151518;
+        }
+
+        .setup-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .setup-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            gap: 8px;
+            align-items: center;
+            background-color: var(--bg-input);
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+        }
+
+        .setup-row input {
+            padding: 6px;
+            font-size: 0.85rem;
+            text-align: center;
+        }
+
+        .selector-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .selector-btn {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            padding: 16px;
+            border-radius: 6px;
+            font-weight: 500;
+            font-size: 0.9rem;
+            cursor: pointer;
+        }
+
+        .selector-btn.active {
+            border-color: var(--accent);
+            background-color: #221314;
+        }
+
+        .card-workout {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 18px;
+            margin-bottom: 16px;
+        }
+
+        .card-workout h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .meta-tag {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+        }
+
+        .set-row {
+            display: grid;
+            grid-template-columns: 1fr 1.5fr;
+            align-items: center;
+            gap: 16px;
+            font-size: 0.85rem;
+            margin-bottom: 8px;
+        }
+
+        .set-row input {
+            padding: 8px 12px;
+            font-size: 0.9rem;
+        }
+
+        .timer-view-display {
+            font-size: 4.5rem;
+            font-weight: 700;
+            text-align: center;
+            margin: 48px 0;
+            font-variant-numeric: tabular-nums;
+            letter-spacing: -1px;
+        }
+
+        .timer-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .btn-preset {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            padding: 14px;
+            border-radius: 6px;
+            font-weight: 500;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .excel-table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: var(--bg-card);
+            border-radius: 6px;
+            overflow: hidden;
+            font-size: 0.9rem;
+        }
+
+        .excel-table th, .excel-table td {
+            border: 1px solid var(--border);
+            padding: 14px;
+            text-align: left;
+        }
+
+        .excel-table th {
+            background-color: #151518;
+            color: var(--text-muted);
+            font-weight: 500;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .excel-table tr {
+            cursor: pointer;
+        }
+
+        .excel-table tr:hover td {
+            background-color: var(--bg-input);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(10,10,12,0.9);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            padding: 16px;
+        }
+
+        .modal-body {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            width: 100%;
+            max-width: 460px;
+            padding: 24px;
+            position: relative;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 1.25rem;
+            cursor: pointer;
+        }
+
+        nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: var(--bg-card);
+            border-top: 1px solid var(--border);
+            display: flex;
+            padding: 12px 0;
+            z-index: 900;
+        }
+
+        .nav-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 0.7rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            flex: 1;
+            font-weight: 500;
+        }
+
+        .nav-btn.active {
+            color: var(--accent);
+        }
+
+        .nav-btn svg {
+            width: 18px;
+            height: 18px;
+            fill: currentColor;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Iron<span>Track</span></h1>
+        <button class="auth-btn" id="login-trigger" onclick="handleAuth()">
+            <svg width="14" height="14" viewBox="0 0 24 24"><path d="M12.24 10.285V14.4h6.887c-.648 2.41-2.519 4.114-5.136 4.114-3.41 0-6.173-2.763-6.173-6.173s2.763-6.173 6.173-6.173c1.558 0 2.977.577 4.075 1.526l3.1-3.1C19.294 2.19 15.99 1 12.24 1 5.756 1 .5 6.256.5 12.74s5.256 11.74 11.74 11.74c6.776 0 12.24-4.91 12.24-11.74 0-.746-.067-1.463-.193-2.155H12.24z"/></svg>
+            <span id="auth-status-text">Ingresar con Google</span>
+        </button>
+    </header>
+
+    <main>
+        <section id="view-config" class="view-section active">
+            <h2>Banco de Ejercicios</h2>
+            <div class="form-inline">
+                <input type="text" id="input-exercise" placeholder="Nombre del ejercicio">
+                <button class="btn-action" onclick="createExercise()">+</button>
+            </div>
+            <div class="chip-group" id="container-chips"></div>
+
+            <h2>Estructura de Días</h2>
+            <div class="form-inline">
+                <input type="text" id="input-day" placeholder="Ej: Lunes - Torso">
+                <button class="btn-action" onclick="createDay()">+</button>
+            </div>
+            <div id="container-accordion"></div>
+        </section>
+
+        <section id="view-workout" class="view-section">
+            <h2>Entrenamiento</h2>
+            <div class="selector-grid" id="container-workout-selector"></div>
+            <div id="container-workout-cards"></div>
+        </section>
+
+        <section id="view-progress" class="view-section">
+            <h2>Historial de Fuerza</h2>
+            <table class="excel-table">
+                <thead>
+                    <tr>
+                        <th>Ejercicio</th>
+                        <th>Último Peso</th>
+                    </tr>
+                </thead>
+                <tbody id="table-progress-body"></tbody>
+            </table>
+        </section>
+
+        <section id="view-timer" class="view-section">
+            <h2>Temporizador</h2>
+            <div class="timer-view-display" id="timer-label">00:00</div>
+            <div class="timer-grid">
+                <button class="btn-preset" onclick="runTimer(90)">90 Seg</button>
+                <button class="btn-preset" onclick="runTimer(180)">3 Min</button>
+                <button class="btn-preset" onclick="runCustomTimer()">Personalizado</button>
+            </div>
+            <button class="btn-action" style="background-color: #2a2a30;" onclick="clearTimer()">Reset</button>
+        </section>
+    </main>
+
+    <div class="modal" id="modal-chart">
+        <div class="modal-body">
+            <button class="close-btn" onclick="closeGraph()">&times;</button>
+            <h3 id="modal-title" style="margin-bottom:20px; font-size:1rem; font-weight:600;"></h3>
+            <canvas id="canvasChart"></canvas>
+        </div>
+    </div>
+
+    <nav>
+        <button class="nav-btn active" onclick="navigate('view-config', this)">
+            <svg viewBox="0 0 24 24"><path d="M19.43 12.98c.04-.32.07-.64.07-.98s-.03-.66-.07-.98l2.11-1.65c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1c-.52-.4-1.08-.73-1.69-.98l-.38-2.65C14.46 2.18 14.25 2 14 2h-4c-.25 0-.46.18-.49.42l-.38 2.65c-.61.25-1.17.59-1.69.98l-2.49-1c-.23-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64l2.11 1.65c-.04.32-.07.65-.07.98s.03.66.07.98l-2.11 1.65c-.19.15-.24.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1c.52.4 1.08.73 1.69.98l.38 2.65c.03.24.24.42.49.42h4c.25 0xl.46-.18.49-.42l.38-2.65c.61-.25 1.17-.59 1.69-.98l2.49 1c.23.09.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.65zM12 15.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z"/></svg>
+            Armado
+        </button>
+        <button class="nav-btn" onclick="navigate('view-workout', this)">
+            <svg viewBox="0 0 24 24"><path d="M20.57 14.86L22 13.43 20.57 12 17 15.57 8.43 7 12 3.43 10.57 2 9.14 3.43 7.71 2 5.57 4.14 4.14 2.71 2.71 4.14 4.14 5.57 2 7.71 3.43 9.14 2 10.57 3.43 12l3.57-3.57 8.57 8.57L12 20.57 13.43 22l1.43-1.43L16.29 22l2.14-2.14 1.43 1.43 1.43-1.43L22 19.14l-1.43-1.43 2.14-2.14-2.14-0.71z"/></svg>
+            Entrenar
+        </button>
+        <button class="nav-btn" onclick="navigate('view-progress', this)">
+            <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg>
+            Progreso
+        </button>
+        <button class="nav-btn" onclick="navigate('view-timer', this)">
+            <svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67V7z"/></svg>
+            Descanso
+        </button>
+    </nav>
+
+    <script>
+        let userData = { bancoEjercicios: [], dias: {}, historialPesos: {} };
+        let activeUid = null;
+        let clockInterval = null;
+        let lineChart = null;
+
+        window.addEventListener('DOMContentLoaded', () => {
+            window.auth.onAuthStateChanged(user => {
+                if (user) {
+                    activeUid = user.uid;
+                    document.getElementById('auth-status-text').innerText = "Salir";
+                    pullUserData();
+                } else {
+                    activeUid = null;
+                    document.getElementById('auth-status-text').innerText = "Ingresar con Google";
+                    userData = { bancoEjercicios: [], dias: {}, historialPesos: {} };
+                    refreshUI();
+                }
+            });
+        });
+
+        async function handleAuth() {
+            if (activeUid) {
+                window.logout();
+            } else {
+                try { await window.signInWithGoogle(); } catch (e) { console.error(e); }
+            }
+        }
+
+        async function pullUserData() {
+            if (!activeUid) return;
+            const ref = window.doc(window.db, "users", activeUid);
+            const snap = await window.getDoc(ref);
+            if (snap.exists()) {
+                userData = snap.data();
+                refreshUI();
+            } else {
+                await window.setDoc(ref, userData);
+            }
+        }
+
+        async function pushUserData() {
+            if (!activeUid) return;
+            const ref = window.doc(window.db, "users", activeUid);
+            await window.setDoc(ref, userData);
+        }
+
+        function navigate(viewId, element) {
+            document.querySelectorAll('.view-section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(n => n.classList.remove('active'));
+            document.getElementById(viewId).classList.add('active');
+            element.classList.add('active');
+
+            if (viewId === 'view-workout') buildWorkoutSelectors();
+            if (viewId === 'view-progress') buildProgressTable();
+        }
+
+        function refreshUI() {
+            buildChips();
+            buildAccordions();
+        }
+
+        function buildChips() {
+            const box = document.getElementById('container-chips');
+            box.innerHTML = userData.bancoEjercicios.map(e => `<div class="chip">${e}</div>`).join('');
+        }
+
+        function buildAccordions() {
+            const box = document.getElementById('container-accordion');
+            box.innerHTML = Object.keys(userData.dias).map(id => {
+                const day = userData.dias[id];
+                return `
+                    <div class="accordion">
+                        <div class="accordion-header" onclick="toggleAccordion('${id}')">
+                            <span>${day.nombre}</span>
+                            <span>▼</span>
+                        </div>
+                        <div class="accordion-content" id="content-${id}" style="display:none;">
+                            <select onchange="injectExerciseToDay('${id}', this.value); this.value=''">
+                                <option value="">+ Vincular Ejercicio</option>
+                                ${userData.bancoEjercicios.map(ex => `<option value="${ex}">${ex}</option>`).join('')}
+                            </select>
+                            <div class="setup-list">
+                                ${day.ejercicios.map(ex => `
+                                    <div class="setup-row">
+                                        <span>${ex.name}</span>
+                                        <input type="number" value="${ex.series}" placeholder="Ser" onchange="editMetrics('${id}', '${ex.name}', 'series', this.value)">
+                                        <input type="text" value="${ex.reps}" placeholder="Rep" onchange="editMetrics('${id}', '${ex.name}', 'reps', this.value)">
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function toggleAccordion(id) {
+            const el = document.getElementById(`content-${id}`);
+            el.style.display = el.style.display === 'none' ? 'block' : 'none';
+        }
+
+        async function createExercise() {
+            const input = document.getElementById('input-exercise');
+            const name = input.value.trim();
+            if (name && !userData.bancoEjercicios.includes(name)) {
+                userData.bancoEjercicios.push(name);
+                input.value = '';
+                buildChips();
+                buildAccordions();
+                await pushUserData();
+            }
+        }
+
+        async function createDay() {
+            const input = document.getElementById('input-day');
+            const name = input.value.trim();
+            if (name) {
+                const id = 'day_' + Date.now();
+                userData.dias[id] = { nombre: name, ejercicios: [] };
+                input.value = '';
+                buildAccordions();
+                await pushUserData();
+            }
+        }
+
+        async function injectExerciseToDay(dayId, name) {
+            if (!name) return;
+            const day = userData.dias[dayId];
+            if (!day.ejercicios.some(e => e.name === name)) {
+                day.ejercicios.push({ name: name, series: 4, reps: 10 });
+                buildAccordions();
+                document.getElementById(`content-${dayId}`).style.display = 'block';
+                await pushUserData();
+            }
+        }
+
+        async function editMetrics(dayId, name, field, value) {
+            const target = userData.dias[dayId].ejercicios.find(e => e.name === name);
+            if (target) {
+                target[field] = value;
+                await pushUserData();
+            }
+        }
+
+        function buildWorkoutSelectors() {
+            const grid = document.getElementById('container-workout-selector');
+            grid.innerHTML = Object.keys(userData.dias).map(id => `
+                <button class="selector-btn" onclick="openWorkoutSession('${id}', this)">${userData.dias[id].nombre}</button>
+            `).join('');
+            document.getElementById('container-workout-cards').innerHTML = '';
+        }
+
+        function openWorkoutSession(dayId, btn) {
+            document.querySelectorAll('.selector-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+
+            const day = userData.dias[dayId];
+            const box = document.getElementById('container-workout-cards');
+
+            box.innerHTML = day.ejercicios.map(ex => {
+                const logs = userData.historialPesos[ex.name] || [];
+                const last = logs.length > 0 ? `${logs[logs.length - 1].peso} kg` : 'Sin registros';
+                
+                let inputs = '';
+                for (let i = 1; i <= ex.series; i++) {
+                    inputs += `
+                        <div class="set-row">
+                            <span>Serie ${i} (${ex.reps} Reps)</span>
+                            <input type="number" placeholder="0 kg" onblur="commitWeight('${ex.name}', this.value)">
+                        </div>
+                    `;
+                }
+
+                return `
+                    <div class="card-workout">
+                        <h3>${ex.name}</h3>
+                        <div class="meta-tag">Último peso: <strong>${last}</strong></div>
+                        ${inputs}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        async function commitWeight(name, val) {
+            const weight = parseFloat(val);
+            if (!weight) return;
+
+            if (!userData.historialPesos[name]) userData.historialPesos[name] = [];
+            const today = new Date().toISOString().split('T')[0];
+
+            userData.historialPesos[name].push({ fecha: today, peso: weight });
+            await pushUserData();
+        }
+
+        function buildProgressTable() {
+            const body = document.getElementById('table-progress-body');
+            body.innerHTML = userData.bancoEjercicios.map(ex => {
+                const logs = userData.historialPesos[ex] || [];
+                const last = logs.length > 0 ? `${logs[logs.length - 1].peso} kg` : '-';
+                return `
+                    <tr onclick="showGraph('${ex}')">
+                        <td style="font-weight:500;">${ex}</td>
+                        <td style="color:var(--accent); font-weight:600;">${last}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function showGraph(name) {
+            document.getElementById('modal-title').innerText = name;
+            document.getElementById('modal-chart').style.display = 'flex';
+
+            const logs = userData.historialPesos[name] || [];
+            const labels = logs.map(l => l.fecha);
+            const points = logs.map(l => l.peso);
+
+            const ctx = document.getElementById('canvasChart').getContext('2d');
+            if (lineChart) lineChart.destroy();
+
+            lineChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: points,
+                        borderColor: '#e50914',
+                        backgroundColor: 'rgba(229, 9, 20, 0.05)',
+                        borderWidth: 2,
+                        tension: 0.1,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { grid: { color: '#2a2a30' }, ticks: { color: '#a8a8b3' } },
+                        x: { grid: { color: '#2a2a30' }, ticks: { color: '#a8a8b3' } }
+                    }
+                }
+            });
+        }
+
+        function closeGraph() {
+            document.getElementById('modal-chart').style.display = 'none';
+        }
+
+        function runTimer(sec) {
+            clearInterval(clockInterval);
+            let left = sec;
+            renderClock(left);
+
+            clockInterval = setInterval(() => {
+                left--;
+                renderClock(left);
+                if (left <= 0) {
+                    clearInterval(clockInterval);
+                    alert("Tiempo completado.");
+                }
+            }, 1000);
+        }
+
+        function runCustomTimer() {
+            const input = prompt("Segundos de descanso:");
+            if (input) runTimer(parseInt(input, 10));
+        }
+
+        function clearTimer() {
+            clearInterval(clockInterval);
+            renderClock(0);
+        }
+
+        function renderClock(sec) {
+            const m = Math.floor(sec / 60).toString().padStart(2, '0');
+            const s = (sec % 60).toString().padStart(2, '0');
+            document.getElementById('timer-label').innerText = `${m}:${s}`;
+        }
+    </script>
+</body>
+</html>
