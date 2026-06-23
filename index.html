@@ -29,7 +29,16 @@ const firebaseConfig = {
 
         window.auth = auth;
         window.db = db;
-        window.signInWithGoogle = () => signInWithPopup(auth, provider);
+        // ... Código anterior de Firebase inicializado sin cambios ...
+
+import { getAuth, signInWithRedirect, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+// ... config y auth permanecen igual ...
+
+window.signInWithGoogle = () => {
+    // signInWithRedirect evita que el navegador del celular bloquee la ventana de login
+    return signInWithRedirect(auth, provider);
+};
         window.logout = () => signOut(auth);
         window.doc = doc;
         window.setDoc = setDoc;
@@ -205,6 +214,21 @@ const firebaseConfig = {
             border-top: 1px solid var(--border);
             background-color: #151518;
         }
+
+        .accordion-content select {
+    width: 100%;
+    max-width: 100%;
+    background-color: var(--bg-input);
+    border: 1px solid var(--border);
+    color: var(--text-main);
+    padding: 12px;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    outline: none;
+    box-sizing: border-box; /* Asegura que el padding no estire el cuadro hacia la derecha */
+    display: block;
+    margin-bottom: 12px;
+}
 
         .setup-list {
             display: flex;
