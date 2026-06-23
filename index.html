@@ -347,11 +347,32 @@ const firebaseConfig = {
             font-size: 0.9rem;
         }
 
-        .excel-table th, .excel-table td {
+        .excel-table th {
             border: 1px solid var(--border);
             padding: 14px;
             text-align: left;
         }
+
+        /* Permite que el texto largo en la tabla de progreso baje automáticamente */
+.excel-table td {
+    border: 1px solid var(--border);
+    padding: 14px;
+    text-align: left;
+    white-space: normal;
+    word-break: break-word;
+    line-height: 1.3;
+}
+
+/* Aplica puntos suspensivos si el nombre del ejercicio en el gráfico es muy largo */
+.modal-body h3 {
+    margin-bottom: 20px; 
+    font-size: 1rem; 
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 85%; /* Evita que choque con el botón de cerrar */
+}
 
         .excel-table th {
             background-color: #151518;
