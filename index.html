@@ -10,8 +10,8 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-        import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDoc, updateDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+        import { getAuth, signInWithPopup, GoogleAuthProvider, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCWZNvXnML65-tiEwEofQU9y2ePkVtUU9w",
@@ -34,8 +34,6 @@ const firebaseConfig = {
         window.doc = doc;
         window.setDoc = setDoc;
         window.getDoc = getDoc;
-        window.updateDoc = updateDoc;
-        window.arrayUnion = arrayUnion;
     </script>
     <style>
         :root {
@@ -179,6 +177,9 @@ const firebaseConfig = {
             border-radius: 6px;
             font-size: 0.85rem;
             color: var(--text-main);
+            white-space: normal;
+            word-break: break-word;
+            max-width: 100%;
         }
 
         .accordion {
@@ -212,47 +213,28 @@ const firebaseConfig = {
             margin-top: 12px;
         }
 
-    /* Modificación de la fila para dar más espacio al texto y permitir saltos automáticos */
-.setup-row {
-    display: grid;
-    grid-template-columns: 1.5fr 60px 60px; /* Ancho fijo para inputs, el resto para el texto */
-    gap: 8px;
-    align-items: center;
-    background-color: var(--bg-input);
-    padding: 8px 12px;
-    border-radius: 4px;
-    font-size: 0.85rem;
-}
+        .setup-row {
+            display: grid;
+            grid-template-columns: 1.5fr 60px 60px;
+            gap: 8px;
+            align-items: center;
+            background-color: var(--bg-input);
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+        }
 
-/* Forzar que el texto del ejercicio baje en lugar de estirar la pantalla */
-.setup-row span {
-    white-space: normal;
-    word-break: break-word;
-    line-height: 1.2;
-}
+        .setup-row span {
+            white-space: normal;
+            word-break: break-word;
+            line-height: 1.2;
+        }
 
-/* Ajuste idéntico para los chips del banco global de ejercicios */
-.chip {
-    background-color: var(--bg-card);
-    border: 1px solid var(--border);
-    padding: 8px 14px;
-    border-radius: 6px;
-    font-size: 0.85rem;
-    color: var(--text-main);
-    white-space: normal;
-    word-break: break-word;
-    max-width: 100%;
-}
-
-/* Ajuste para los títulos principales de los ejercicios en el modo entrenamiento */
-.card-workout h3 {
-    font-size: 1rem;
-    font-weight: 600;
-    margin-bottom: 4px;
-    white-space: normal;
-    word-break: break-word;
-    line-height: 1.3;
-}
+        .setup-row input {
+            padding: 6px;
+            font-size: 0.85rem;
+            text-align: center;
+        }
 
         .selector-grid {
             display: grid;
@@ -289,6 +271,9 @@ const firebaseConfig = {
             font-size: 1rem;
             font-weight: 600;
             margin-bottom: 4px;
+            white-space: normal;
+            word-break: break-word;
+            line-height: 1.3;
         }
 
         .meta-tag {
@@ -299,7 +284,7 @@ const firebaseConfig = {
 
         .set-row {
             display: grid;
-            grid-template-columns: 1fr 1.5fr;
+            grid-template-columns: 1.5fr 1fr;
             align-items: center;
             gap: 16px;
             font-size: 0.85rem;
@@ -347,32 +332,11 @@ const firebaseConfig = {
             font-size: 0.9rem;
         }
 
-        .excel-table th {
+        .excel-table th, .excel-table td {
             border: 1px solid var(--border);
             padding: 14px;
             text-align: left;
         }
-
-        /* Permite que el texto largo en la tabla de progreso baje automáticamente */
-.excel-table td {
-    border: 1px solid var(--border);
-    padding: 14px;
-    text-align: left;
-    white-space: normal;
-    word-break: break-word;
-    line-height: 1.3;
-}
-
-/* Aplica puntos suspensivos si el nombre del ejercicio en el gráfico es muy largo */
-.modal-body h3 {
-    margin-bottom: 20px; 
-    font-size: 1rem; 
-    font-weight: 600;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 85%; /* Evita que choque con el botón de cerrar */
-}
 
         .excel-table th {
             background-color: #151518;
@@ -381,6 +345,12 @@ const firebaseConfig = {
             font-size: 0.8rem;
             text-transform: uppercase;
             letter-spacing: 0.5px;
+        }
+
+        .excel-table td {
+            white-space: normal;
+            word-break: break-word;
+            line-height: 1.3;
         }
 
         .excel-table tr {
@@ -413,6 +383,16 @@ const firebaseConfig = {
             max-width: 460px;
             padding: 24px;
             position: relative;
+        }
+
+        .modal-body h3 {
+            margin-bottom: 20px; 
+            font-size: 1rem; 
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 85%;
         }
 
         .close-btn {
@@ -468,7 +448,7 @@ const firebaseConfig = {
     <header>
         <h1>Iron<span>Track</span></h1>
         <button class="auth-btn" id="login-trigger" onclick="handleAuth()">
-            <svg width="14" height="14" viewBox="0 0 24 24"><path d="M12.24 10.285V14.4h6.887c-.648 2.41-2.519 4.114-5.136 4.114-3.41 0-6.173-2.763-6.173-6.173s2.763-6.173 6.173-6.173c1.558 0 2.977.577 4.075 1.526l3.1-3.1C19.294 2.19 15.99 1 12.24 1 5.756 1 .5 6.256.5 12.74s5.256 11.74 11.74 11.74c6.776 0 12.24-4.91 12.24-11.74 0-.746-.067-1.463-.193-2.155H12.24z"/></svg>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12.24 10.285V14.4h6.887c-.648 2.41-2.519 4.114-5.136 4.114-3.41 0-6.173-2.763-6.173-6.173s2.763-6.173 6.173-6.173c1.558 0 2.977.577 4.075 1.526l3.1-3.1C19.294 2.19 15.99 1 12.24 1 5.756 1 .5 6.256.5 12.74s5.256 11.74 11.74 11.74c6.776 0 12.24-4.91 12.24-11.74 0-.746-.067-1.463-.193-2.155H12.24z"/></svg>
             <span id="auth-status-text">Ingresar con Google</span>
         </button>
     </header>
@@ -524,7 +504,7 @@ const firebaseConfig = {
     <div class="modal" id="modal-chart">
         <div class="modal-body">
             <button class="close-btn" onclick="closeGraph()">&times;</button>
-            <h3 id="modal-title" style="margin-bottom:20px; font-size:1rem; font-weight:600;"></h3>
+            <h3 id="modal-title"></h3>
             <canvas id="canvasChart"></canvas>
         </div>
     </div>
@@ -708,25 +688,23 @@ const firebaseConfig = {
             const day = userData.dias[dayId];
             const box = document.getElementById('container-workout-cards');
 
+            if(!day || day.ejercicios.length === 0) {
+                box.innerHTML = `<p style="color: var(--text-muted); text-align: center;">Este día no tiene ejercicios asignados aún.</p>`;
+                return;
+            }
+
             box.innerHTML = day.ejercicios.map(ex => {
                 const logs = userData.historialPesos[ex.name] || [];
                 const last = logs.length > 0 ? `${logs[logs.length - 1].peso} kg` : 'Sin registros';
                 
-                let inputs = '';
-                for (let i = 1; i <= ex.series; i++) {
-                    inputs += `
-                        <div class="set-row">
-                            <span>Serie ${i} (${ex.reps} Reps)</span>
-                            <input type="number" placeholder="0 kg" onblur="commitWeight('${ex.name}', this.value)">
-                        </div>
-                    `;
-                }
-
                 return `
                     <div class="card-workout">
                         <h3>${ex.name}</h3>
                         <div class="meta-tag">Último peso: <strong>${last}</strong></div>
-                        ${inputs}
+                        <div class="set-row">
+                            <span>Peso Max (${ex.series}x${ex.reps})</span>
+                            <input type="number" placeholder="0 kg" onblur="commitWeight('${ex.name}', this.value)">
+                        </div>
                     </div>
                 `;
             }).join('');
